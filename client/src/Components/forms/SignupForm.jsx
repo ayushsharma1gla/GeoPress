@@ -1,0 +1,250 @@
+import { useState,useContext } from "react";
+import { FaRegEyeSlash, FaRegEye } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import axios from "axios";
+import { UserContext } from "../../context/UserContext";
+import { API_BASE_URL } from "../../lib/api";
+
+const SignupForm = ({ setLoggedIn }) => {
+  const [image, setImage] = useState(null);
+  const { fetchUser } = useContext(UserContext);
+  const [formData, setFormData] = useState({
+    firstname: "",
+    lastname: "",
+    email: "",
+    password: "",
+    confirmpassword: "",
+    gender: "",
+    city: "",
+  });
+
+  const [showpassword, setShowPassword] = useState(false);
+  const [showcpassword, setShowcPassword] = useState(false);
+
+  const navigate = useNavigate();
+
+  function changehandler(e) {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  }
+
+  async function submitHandler(e) {
+    e.preventDefault();
+
+    if (formData.password !== formData.confirmpassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+   const signupData = new FormData();
+
+signupData.append("firstname", formData.firstname);
+signupData.append("lastname", formData.lastname);
+signupData.append("email", formData.email);
+signupData.append("password", formData.password);
+signupData.append("gender", formData.gender);
+signupData.append("city", formData.city);
+
+if(image){
+  signupData.append("profileImage", image);
+}
+
+    try {
+   const response = await axios.post(
+  `${API_BASE_URL}/api/auth/signup`,
+  signupData,
+  {
+    headers:{
+      "Content-Type":"multipart/form-data"
+    }
+  }
+);
+localStorage.setItem("token", response.data.token);
+localStorage.setItem("isLoggedIn", "true");
+
+await fetchUser();   // <-- Load the user into UserContext
+
+setLoggedIn(true);
+
+toast.success(response.data.message);
+
+navigate("/home");
+    } catch (error) {
+      console.log(error);
+
+      toast.error(
+        error.response?.data?.message || "Signup Failed"
+      );
+    }
+  }
+
+  return (
+    <div className="w-full max-w-md mx-auto mt-10 bg-gray-900 p-6 rounded-xl shadow-lg">
+      <form onSubmit={submitHandler} className="space-y-4">
+
+        {/* First Name & Last Name */}
+        <div className="flex gap-4">
+          <label className="w-1/2">
+            <p className="mb-1 font-medium text-gray-300">
+              First Name <sup className="text-red-500">*</sup>
+            </p>
+            <input
+              type="text"
+              name="firstname"
+              required
+              placeholder="Enter first name"
+              value={formData.firstname}
+              onChange={changehandler}
+              className="w-full border rounded-lg px-3 py-2 text-white"
+            />
+          </label>
+
+          <label className="w-1/2">
+            <p className="mb-1 font-medium text-gray-300">
+              Last Name <sup className="text-red-500">*</sup>
+            </p>
+            <input
+              type="text"
+              name="lastname"
+              required
+              placeholder="Enter last name"
+              value={formData.lastname}
+              onChange={changehandler}
+              className="w-full border rounded-lg px-3 py-2 text-white"
+            />
+          </label>
+        </div>
+
+        {/* Email */}
+        <label className="block">
+          <p className="mb-1 font-medium text-gray-300">
+            Email <sup className="text-red-500">*</sup>
+          </p>
+          <input
+            type="email"
+            name="email"
+            required
+            placeholder="Enter email"
+            value={formData.email}
+            onChange={changehandler}
+            className="w-full border rounded-lg px-3 py-2 text-white"
+          />
+        </label>
+
+        {/* Gender */}
+        <label className="block">
+          <p className="mb-1 font-medium text-gray-300">
+            Gender <sup className="text-red-500">*</sup>
+          </p>
+
+          <select
+            name="gender"
+            required
+            value={formData.gender}
+            onChange={changehandler}
+            className="w-full border rounded-lg px-3 py-2 text-white"
+          >
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </label>
+
+        {/* City */}
+        <label className="block">
+          <p className="mb-1 font-medium text-gray-300">
+            City <sup className="text-red-500">*</sup>
+          </p>
+
+          <input
+            type="text"
+            name="city"
+            required
+            placeholder="Enter city"
+            value={formData.city}
+            onChange={changehandler}
+            className="w-full border rounded-lg px-3 py-2 text-white"
+          />
+        </label>
+{/* Profile Image */}
+<label className="block">
+  <p className="mb-1 font-medium text-gray-300">
+    Profile Image
+  </p>
+
+  <input
+    type="file"
+    accept="image/*"
+    onChange={(e) => setImage(e.target.files[0])}
+    className="w-full text-white"
+  />
+</label>
+        {/* Password */}
+        <div className="relative">
+          <label className="block">
+            <p className="mb-1 font-medium text-gray-300">
+              Password <sup className="text-red-500">*</sup>
+            </p>
+
+            <input
+              type={showpassword ? "text" : "password"}
+              name="password"
+              required
+              placeholder="Enter password"
+              value={formData.password}
+              onChange={changehandler}
+              className="w-full border rounded-lg px-3 py-2 text-white"
+            />
+          </label>
+
+          <span
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-3 bottom-3 cursor-pointer text-xl text-gray-300"
+          >
+            {showpassword ? <FaRegEye /> : <FaRegEyeSlash />}
+          </span>
+        </div>
+
+        {/* Confirm Password */}
+        <div className="relative">
+          <label className="block">
+            <p className="mb-1 font-medium text-gray-300">
+              Confirm Password <sup className="text-red-500">*</sup>
+            </p>
+
+            <input
+              type={showcpassword ? "text" : "password"}
+              name="confirmpassword"
+              required
+              placeholder="Re-enter password"
+              value={formData.confirmpassword}
+              onChange={changehandler}
+              className="w-full border rounded-lg px-3 py-2 text-white"
+            />
+          </label>
+
+          <span
+            onClick={() => setShowcPassword((prev) => !prev)}
+            className="absolute right-3 bottom-3 cursor-pointer text-xl text-gray-300"
+          >
+            {showcpassword ? <FaRegEye /> : <FaRegEyeSlash />}
+          </span>
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="w-full mt-4 bg-[#E0FF00] text-black py-2 rounded-lg font-semibold hover:bg-yellow-400 transition"
+        >
+          Create Account
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default SignupForm;
