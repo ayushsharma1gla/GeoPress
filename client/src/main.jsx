@@ -1,0 +1,26 @@
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import { UserProvider } from './context/UserContext.jsx';
+// Import Leaflet CSS globally
+import "leaflet/dist/leaflet.css";
+
+import App from './App.jsx'
+import { BrowserRouter } from "react-router-dom"
+import { ToastContainer } from 'react-toastify'
+import { NewsProvider } from './context/NewsContext.jsx';
+createRoot(document.getElementById('root')).render(
+  <BrowserRouter>
+ 
+   <UserProvider>
+     <NewsProvider>
+      <App />
+     </NewsProvider>
+     
+   </UserProvider>
+
+     
+    
+    <ToastContainer></ToastContainer>
+  </BrowserRouter>
+)
