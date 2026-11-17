@@ -1,5 +1,7 @@
 # GeoPress
 
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Visit_GeoPress-00C853?style=for-the-badge&logo=vercel&logoColor=white)](https://geo-press-three.vercel.app/home)
+
 GeoPress is a location-based news application. It combines an interactive map with a news feed, geocoding, and user accounts.
 
 ## Project structure
